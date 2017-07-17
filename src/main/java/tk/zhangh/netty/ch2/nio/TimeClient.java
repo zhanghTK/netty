@@ -1,7 +1,7 @@
-package tk.zhangh.netty.ch1.aio.client;
+package tk.zhangh.netty.ch2.nio;
 
 /**
- * P46 AIO时间服务器客户端
+ * P39 NIO时间服务器客户端
  * Created by ZhangHao on 17/7/16.
  */
 public class TimeClient {
@@ -14,6 +14,7 @@ public class TimeClient {
                 e.printStackTrace();
             }
         }
-        new Thread(new AsyncTimeClientHandler("127.0.0.1", port), "AIO-AsyncTimeClientHandler-001").start();
+
+        new Thread(new TimeClientHandle("localhost", port), "TimeClient-001").start();
     }
 }

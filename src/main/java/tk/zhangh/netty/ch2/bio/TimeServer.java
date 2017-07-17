@@ -1,13 +1,11 @@
-package tk.zhangh.netty.ch1.paio;
-
-import tk.zhangh.netty.ch1.bio.TimeServerHandler;
+package tk.zhangh.netty.ch2.bio;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * P19 伪异步IO的TimeServer
+ * P13 同步阻塞IO创建TimeServer
  * Created by ZhangHao on 17/7/16.
  */
 public class TimeServer {
@@ -25,10 +23,15 @@ public class TimeServer {
             server = new ServerSocket(port);
             System.out.println("The time server is start in port : " + port);
             Socket socket;
-            TimeServerHandlerExecutePool singleExecutor = new TimeServerHandlerExecutePool(50, 1000);
             while (true) {
+                /*
+                 * 若没有客户端接入， 主线程一直阻塞在 accept 操作上。
+                 *  java.lang.Thread.State: RUNNABLE
+                 *  at java.net.PlainSocketImpl.socketAccept(Native Method)
+                 *  at java.net.AbstractPlainSocketImpl.accept(AbstractPlainSocketImpl.java:398)
+                 */
                 socket = server.accept();
-                singleExecutor.execute(new TimeServerHandler(socket));    // 在此处多了个线程池模型
+                new Thread(new TimeServerHandler(socket)).start();
             }
         } finally {
             if (server != null) {
@@ -36,5 +39,6 @@ public class TimeServer {
                 server.close();
             }
         }
+
     }
 }

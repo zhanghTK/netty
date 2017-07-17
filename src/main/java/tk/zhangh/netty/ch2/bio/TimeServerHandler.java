@@ -1,4 +1,4 @@
-package tk.zhangh.netty.ch1.bio;
+package tk.zhangh.netty.ch2.bio;
 
 import java.io.BufferedReader;
 import java.io.IOException;

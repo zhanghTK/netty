@@ -1,4 +1,4 @@
-package tk.zhangh.netty.ch1.aio.server;
+package tk.zhangh.netty.ch2.aio.server;
 
 import java.io.IOException;
 

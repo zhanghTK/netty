@@ -1,4 +1,4 @@
-package tk.zhangh.netty.ch1.paio;
+package tk.zhangh.netty.ch2.paio;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;

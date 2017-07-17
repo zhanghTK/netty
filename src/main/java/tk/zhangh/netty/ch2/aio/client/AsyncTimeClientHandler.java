@@ -1,4 +1,4 @@
-package tk.zhangh.netty.ch1.aio.client;
+package tk.zhangh.netty.ch2.aio.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

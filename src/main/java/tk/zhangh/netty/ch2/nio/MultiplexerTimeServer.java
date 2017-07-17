@@ -1,4 +1,4 @@
-package tk.zhangh.netty.ch1.nio;
+package tk.zhangh.netty.ch2.nio;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
