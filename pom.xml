@@ -20,22 +20,14 @@
       <artifactId>netty-all</artifactId>
       <version>4.1.13.Final</version>
     </dependency>
-  </dependencies>
 
-  <repositories>
-    <repository>
-      <id>central</id>
-      <name>aliyun maven</name>
-      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+    <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>3.3.1</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
