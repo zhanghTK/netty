@@ -26,10 +26,14 @@ public class MultiplexerTimeServer implements Runnable {
      */
     public MultiplexerTimeServer(int port) {
         try {
-            selector = Selector.open();
+            // 1. 打开 ServerSocketChannel
             servChannel = ServerSocketChannel.open();
-            servChannel.configureBlocking(false);  // 设置为异步阻塞模式
-            servChannel.socket().bind(new InetSocketAddress(port), 1024);// 设置 backlog =1024  ， requested maximum length of the queue of incoming connections.
+            servChannel.configureBlocking(false);  // 设置为异步非阻塞模式
+            // 2. 绑定监听地址
+            servChannel.socket().bind(new InetSocketAddress(port), 1024); // 设置 backlog =1024，requested maximum length of the queue of incoming connections.
+            // 3. 创建 Selector
+            selector = Selector.open();
+            // 4. 将 ServerSocketChannel 注册到 Selector
             servChannel.register(selector, SelectionKey.OP_ACCEPT); // 服务端socket监听链接操作
             System.out.println("The time server is start in port : " + port);
         } catch (IOException e) {
@@ -45,12 +49,10 @@ public class MultiplexerTimeServer implements Runnable {
          */
         while (!stop) {
             try {
-                // 每一秒唤醒一次
-                selector.select(1000);
-                // 返回所有就绪状态的channel集合
-                Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                // 遍历就绪状态集合
-                Iterator<SelectionKey> it = selectedKeys.iterator();
+                // 5. selector 轮询就绪的 key
+                selector.select(1000);  // // 每一秒唤醒一次
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();  // 返回所有就绪状态的channel集合
+                Iterator<SelectionKey> it = selectedKeys.iterator();  // 遍历就绪状态集合
                 SelectionKey key;
                 while (it.hasNext()) {
                     key = it.next();
@@ -84,22 +86,22 @@ public class MultiplexerTimeServer implements Runnable {
 
     private void handleInput(SelectionKey key) throws IOException {
         if (key.isValid()) {
-            // 根据操作位获知网络事件的类型
-            if (key.isAcceptable()) {
-                // 处理新接入的请求消息
+            if (key.isAcceptable()) {  // 服务器（被动）接受连接
+                // 6. 处理新的客户端接入
                 ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
-                SocketChannel sc = ssc.accept();  // 类型为ACCEPT建立连接（相当于TCP 3 次握手），
-                sc.configureBlocking(false);  // 设置客户端链接为非阻塞的
-
+                SocketChannel sc = ssc.accept();  // 接收客户端链接请求，创建 SocketChannel 实例（完成三次握手）
+                // 7. 设置客户端链路为非阻塞模式
+                sc.configureBlocking(false);  // 设置客户端链接为异步非阻塞的
+                // 8. 将新接入客户端连接注册到多路复用器上，监听读操作
                 sc.register(selector, SelectionKey.OP_READ); // 客户端socket监听读操作
-
             }
 
-            if (key.isReadable()) {
-                // 读取客户端的请求消息
+            if (key.isReadable()) {  // 消息到达，文件描述符可读
                 SocketChannel sc = (SocketChannel) key.channel();
                 ByteBuffer readBuffer = ByteBuffer.allocate(1024); // 1MB 的缓冲区
+                // 9. 异步读取客户端请求消息到缓冲区
                 int readBytes = sc.read(readBuffer); // 读取请求流
+                // 10. decode 请求消息（可能出现"写半包"，未处理）
                 if (readBytes > 0) {
                     // 读到字节
                     readBuffer.flip();
@@ -125,13 +127,13 @@ public class MultiplexerTimeServer implements Runnable {
     }
 
     private void doWrite(SocketChannel sc, String response) throws IOException {
-        // 可能出现"写半包"，未处理
+        // 未处理写半包问题
         if (response != null && response.trim().length() > 0) {
             byte[] bytes = response.getBytes();
             ByteBuffer writeBuffer = ByteBuffer.allocate(bytes.length);
             writeBuffer.put(bytes);
             writeBuffer.flip();
-
+            // 11. 异步发送给客户端
             sc.write(writeBuffer);
         }
     }

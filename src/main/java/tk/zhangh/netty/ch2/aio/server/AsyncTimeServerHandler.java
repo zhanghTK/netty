@@ -26,7 +26,7 @@ public class AsyncTimeServerHandler implements Runnable {
 
     @Override
     public void run() {
-        latch = new CountDownLatch(1); // 在完成一组正在执行的操作之前，允许当前的线程一直阻塞。
+        latch = new CountDownLatch(1); // 在完成一组正在执行的操作之前，允许当前的线程一直阻塞。防止线程退出
         doAccept();
         try {
             latch.await();
@@ -36,7 +36,10 @@ public class AsyncTimeServerHandler implements Runnable {
     }
 
     public void doAccept() {
-        asynchronousServerSocketChannel.accept(this, new AcceptCompletionHandler());// 处理接受消息的通知。
+        asynchronousServerSocketChannel.accept(
+                this,  // AcceptCompletionHandler.completed 的 AsyncTimeServerHandler 参数
+                new AcceptCompletionHandler()  // 处理接受消息的通知。
+        );
     }
 
 }

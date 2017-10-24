@@ -10,13 +10,23 @@ import java.nio.channels.CompletionHandler;
  */
 public class AcceptCompletionHandler implements CompletionHandler<AsynchronousSocketChannel, AsyncTimeServerHandler> {
 
+    /**
+     * 处理成功
+     *
+     * @param result     IO 调用的结果
+     * @param attachment 发起调用时传入的attachment
+     */
     @Override
     public void completed(AsynchronousSocketChannel result, AsyncTimeServerHandler attachment) {
         // 继续接收其它客户端连接
         attachment.asynchronousServerSocketChannel.accept(attachment, this);
         // 异步读
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        result.read(buffer, buffer, new ReadCompletionHandler(result));
+        result.read(
+                buffer,  // 目标缓冲区
+                buffer,  // ReadCompletionHandler.completed 的 AsyncTimeServerHandler 参数
+                new ReadCompletionHandler(result)
+        );
     }
 
     @Override

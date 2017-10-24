@@ -25,9 +25,11 @@ public class TimeClientHandle implements Runnable {
         this.host = (host == null) ? "localhost" : host;
         this.port = port;
         try {
-            selector = Selector.open();
+            // 1. 打开 SocketChannel
             socketChannel = SocketChannel.open();
+            // 2、设置 SocketChannel为非阻塞模式
             socketChannel.configureBlocking(false);
+            selector = Selector.open();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(-1);
@@ -85,18 +87,16 @@ public class TimeClientHandle implements Runnable {
     private void handleInput(SelectionKey key) throws IOException {
         if (key.isValid()) {
             SocketChannel sc = (SocketChannel) key.channel();
-            if (key.isConnectable()) {
-                // 已处于连接状态
-                if (sc.finishConnect()) {
-                    // 连接成功
-                    sc.register(selector, SelectionKey.OP_READ);
+            if (key.isConnectable()) {  // connect 事件
+                if (sc.finishConnect()) {  // 连接成功
+                    sc.register(selector, SelectionKey.OP_READ);  // 注册读操作
                     doWrite(sc);
                 }
             } else {
                 System.exit(1);// 连接失败。
             }
 
-            if (key.isReadable()) {
+            if (key.isReadable()) {  // 消息到达事件
                 // 服务器应答
                 ByteBuffer readBuffer = ByteBuffer.allocate(1024);
                 int readBytes = sc.read(readBuffer);
@@ -122,13 +122,11 @@ public class TimeClientHandle implements Runnable {
     }
 
     private void doConnection() throws IOException {
-        if (socketChannel.connect(new InetSocketAddress(host, port))) {
-            // 如果直接连接成功，则注册到多路复用器上，发送请求消息，读应答
-            socketChannel.register(selector, SelectionKey.OP_READ);
-            doWrite(socketChannel);
-        } else {
-            // 未收到服务端响应，注册到多路复用器上，注册OP_CONNECT
-            socketChannel.register(selector, SelectionKey.OP_CONNECT);
+        if (socketChannel.connect(new InetSocketAddress(host, port))) {  // 异步连接服务端
+            socketChannel.register(selector, SelectionKey.OP_READ);  // 如果直接连接成功，则注册消息可读事件到多路复用器上
+            doWrite(socketChannel);  //
+        } else {  // 未收到服务端响应，注册到多路复用器上，注册OP_CONNECT
+            socketChannel.register(selector, SelectionKey.OP_CONNECT);  // 当前没有连接成功，则注册连接建立事件到多路复用器上
         }
 
     }
