@@ -51,7 +51,6 @@ public class EchoClient {
             try {
                 port = Integer.valueOf(args[0]);
             } catch (NumberFormatException e) {
-                // TODO 请自行扩展.
             }
         }
 

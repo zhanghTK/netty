@@ -1,8 +1,6 @@
-package tk.zhangh.netty.ch5.delimiter;
+package tk.zhangh.netty.ch7;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -10,10 +8,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import tk.zhangh.netty.ch5.fixedlength.EchoServerHandler;
 
 /**
  * Created by ZhangHao on 2017/7/17.
@@ -43,9 +42,10 @@ public class EchoServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
-                        ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, delimiter));
-                        ch.pipeline().addLast(new StringDecoder());
+                        ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(65535, 0, 2, 0, 2));
+                        ch.pipeline().addLast("msgpack decoder", new MsgpackDecoder());
+                        ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
+                        ch.pipeline().addLast("msgpack encoder", new MsgpackEncoder());
                         ch.pipeline().addLast(new EchoServerHandler());
                     }
                 });
